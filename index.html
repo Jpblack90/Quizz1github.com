@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz de Estrés Laboral</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        body {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23769FD4"/><rect width="50" height="50" fill="%235B8ACC"/><rect x="50" y="50" width="50" height="50" fill="%235B8ACC"/></svg>');
+            background-size: 50px 50px;
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #FFF;
+            padding: 30px;
+            border-radius: 15px;
+            border: 8px solid #000;
+            box-shadow: 
+                0 0 0 4px #E52521,
+                0 0 0 8px #000,
+                10px 10px 0 0 rgba(0,0,0,0.5);
+            image-rendering: pixelated;
+        }
+
+        .start-screen, .quiz-container, .certificate-container {
+            display: none;
+            animation: powerUp 0.5s ease;
+        }
+
+        @keyframes powerUp {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes coin {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1) translateY(-10px); }
+            100% { transform: scale(1); }
+        }
+
+        .active {
+            display: block !important;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #E52521;
+            text-shadow: 2px 2px #000;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .header h1::after {
+            content: '🍄';
+            position: absolute;
+            right: -40px;
+            top: 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #000;
+            border-radius: 15px;
+            margin: 20px 0;
+            padding: 4px;
+            border: 4px solid #000;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(
+                45deg,
+                #FBD000 25%,
+                #FFE863 25%,
+                #FFE863 50%,
+                #FBD000 50%,
+                #FBD000 75%,
+                #FFE863 75%
+            );
+            background-size: 20px 20px;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 8px;
+            animation: progress-animation 1s linear infinite;
+        }
+
+        @keyframes progress-animation {
+            0% { background-position: 0 0; }
+            100% { background-position: 20px 0; }
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 4px solid #000;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: 'Press Start 2P', cursive;
+            background: #FFF;
+        }
+
+        .btn {
+            background: #E52521;
+            color: white;
+            border: 4px solid #000;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+            transition: all 0.1s ease;
+            text-transform: uppercase;
+            box-shadow: 0 4px #000;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px #000;
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px #000;
+        }
+
+        .question {
+            font-size: 18px;
+            margin-bottom: 30px;
+            color: #000;
+            line-height: 1.6;
+            padding: 20px;
+            background: #FFE863;
+            border: 4px solid #000;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .question::before {
+            content: '?';
+            position: absolute;
+            right: -20px;
+            top: -20px;
+            background: #E52521;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .option {
+            background: #FFF;
+            padding: 15px 20px;
+            border: 4px solid #000;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px #000;
+        }
+
+        .option::before {
+            content: '🌟';
+            position: absolute;
+            left: 10px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .option:hover {
+            background: #FFE863;
+            transform: translateY(-2px);
+            box-shadow: 0 6px #000;
+            padding-left: 40px;
+        }
+
+        .option:hover::before {
+            opacity: 1;
+        }
+
+        .option.correct {
+            background: #6BFF89;
+            color: #000;
+            animation: coin 0.5s ease;
+        }
+
+        .option.wrong {
+            background: #E52521;
+            color: white;
+        }
+
+        .certificate {
+            background: #FFE863;
+            padding: 40px;
+            text-align: center;
+            border: 8px solid #000;
+            position: relative;
+            margin: 20px 0;
+            box-shadow: 
+                0 0 0 4px #E52521,
+                0 0 0 12px #000;
+        }
+
+        .certificate h1 {
+            color: #E52521;
+            font-size: 36px;
+            margin: 40px 0 20px;
+            text-shadow: 2px 2px #000;
+        }
+
+        .certificate p {
+            font-size: 18px;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+
+        .signatures {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 60px;
+            position: relative;
+            z-index: 1;
+            background: #FFF;
+            padding: 20px;
+            border: 4px solid #000;
+            border-radius: 8px;
+        }
+
+        .signature img {
+            border: 4px solid #000;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            max-width: 150px;
+        }
+        .logo img {
+            border: 4px solid #000;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            max-width: 150px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .certificate h1 {
+                font-size: 24px;
+            }
+            
+            .certificate p {
+                font-size: 14px;
+          }
+
+            .btn {
+                font-size: 14px;
+                padding: 10px 20px;
+            }
+        }
+        @media print {
+    .btn {
+        display: none;
+    }
+}
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Pantalla de inicio -->
+        <div class="start-screen active">
+            <div class="header">
+                <h1>Evaluación sobre Estrés Laboral</h1>
+                <p>Complete esta evaluación para obtener su certificado</p>
+            </div>
+            <input type="text" id="playerName" placeholder="Ingrese su nombre completo">
+            <button class="btn" onclick="startQuiz()">Comenzar Evaluación</button>
+        </div>
+
+        <!-- Contenedor del Quiz -->
+        <div class="quiz-container">
+            <div class="progress-bar">
+                <div class="progress"></div>
+            </div>
+            <div class="question"></div>
+            <div class="options"></div>
+        </div>
+
+        <!-- Contenedor del Certificado -->
+        <div class="certificate-container">
+            <div class="certificate">
+                <h1>Certificado</h1>
+                <p>DE RECONOCIMIENTO A:</p>
+                <h2 id="certificateName"></h2>
+                <p>Por haber concluido de manera satisfactoria el curso de "Gestion del Estrés y Bienestar en el trabajo", impartido por PsicoInnovaTe, empresa especializada en recursos humanos.</p>
+                <div class="signatures">
+                    <div class="signature">
+                        <img src="/img/FirmaNay.jpg" alt="Firma 1">
+                        <p>Naydeth Prieto</p>
+                        <p>Propietaria</p>
+                    </div>
+                    <div class="logo">
+                        <img src="/img/LogoPsisco.jpg" alt="Logo PsicoInnova">
+                    </div>
+                    <div class="signature">
+                        <img src="/img/FirmaBriza.jpg" alt="Firma 2">
+                        <p>Brisa Meza</p>
+                        <p>Coo-propietaria</p>
+                    </div>
+                </div>
+            </div>
+            <button class="btn" onclick="window.print()">Imprimir Certificado</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+    {
+        question: "¿Cuál de las siguientes situaciones puede aumentar el estrés laboral?",
+        options: [
+            "Metas claras y realistas",
+            "Comunicación abierta entre el equipo",
+            "Reconocimiento del esfuerzo individual",
+            "Falta de control sobre las tareas asignadas"
+        ],
+        correct: 3
+    },
+    {
+        question: "¿Qué característica personal puede aumentar la vulnerabilidad al estrés?",
+        options: [
+            "Ser optimista ante los problemas",
+            "Poseer habilidades de manejo del tiempo",
+            "Tener baja tolerancia a la frustración",
+            "Contar con una buena red de apoyo"
+        ],
+        correct: 2
+    },
+    {
+        question: "¿Qué factor organizacional incrementa el riesgo de estrés laboral?",
+        options: [
+            "Un entorno de trabajo flexible",
+            "Políticas claras y justas",
+            "Reconocimiento frecuente de los logros",
+            "Falta de apoyo por parte de los líderes"
+        ],
+        correct: 3
+    },
+    {
+        question: "¿Qué tipo de carga de trabajo es más estresante?",
+        options: [
+            "La que permite autonomía",
+            "La que es poco desafiante",
+            "La que tiene un equilibrio adecuado",
+            "La excesiva o mal distribuida"
+        ],
+        correct: 3
+    },
+    {
+        question: "¿Cómo influye la inseguridad laboral en el estrés?",
+        options: [
+            "Incrementa los niveles de ansiedad y preocupación",
+            "Reduce los niveles de estrés al fomentar la competitividad",
+            "Genera un sentido de motivación constante",
+            "No tiene impacto en el bienestar"
+        ],
+        correct: 0
+    },
+    {
+        question: "¿Qué herramienta puede ayudar a prevenir el estrés laboral?",
+        options: [
+            "Evitar establecer metas claras",
+            "Gestionar el tiempo de forma eficiente",
+            "Ignorar la comunicación entre colaboradores",
+            "Delegar todas las responsabilidades a otros"
+        ],
+        correct: 1
+    },
+    {
+        question: "¿Qué técnica fomenta un ambiente de trabajo saludable?",
+        options: [
+            "Reducir las pausas laborales",
+            "Incrementar la competitividad entre colaboradores",
+            "Realizar evaluaciones frecuentes del desempeño emocional del equipo",
+            "Evitar la retroalimentación en equipo"
+        ],
+        correct: 2
+    },
+    {
+        question: "¿Cómo pueden los colaboradores prevenir el estrés laboral?",
+        options: [
+            "Manteniéndose aislados del equipo",
+            "Practicando actividades de relajación regularmente",
+            "Ignorando sus propias emociones",
+            "Evitando buscar apoyo de sus líderes"
+        ],
+        correct: 1
+    },
+    {
+        question: "¿Qué acción reduce la tensión en equipos estresados?",
+        options: [
+            "Ignorar los problemas de estrés",
+            "Crear espacios de comunicación abierta",
+            "Incrementar las exigencias del trabajo",
+            "Fomentar competencias internas"
+        ],
+        correct: 1
+    },
+    {
+        question: "¿Qué hábito personal contribuye a la reducción del estrés?",
+        options: [
+            "Dormir menos para aprovechar el tiempo",
+            "Mantener una alimentación balanceada y ejercicio regular",
+            "Trabajar sin interrupciones para terminar rápido",
+            "Evitar la desconexión del trabajo"
+        ],
+        correct: 1
+    },
+    {
+        question: "¿Qué actitud debe asumir un líder para prevenir el estrés en el equipo?",
+        options: [
+            "Evitar involucrarse en problemas personales",
+            "Escuchar activamente y ofrecer apoyo emocional",
+            "Establecer metas excesivamente exigentes",
+            "Ignorar los signos de estrés en los colaboradores"
+        ],
+        correct: 1
+    },
+    {
+        question: "¿Cómo influye un líder empático en el estrés del equipo?",
+        options: [
+            "Incrementa la presión por lograr objetivos",
+            "Crea un ambiente más relajado y colaborativo",
+            "Reduce la productividad general",
+            "Genera conflictos entre los colaboradores"
+        ],
+        correct: 1
+    },
+    {
+        question: "¿Qué herramienta puede implementar un líder para mitigar el estrés del equipo?",
+        options: [
+            "Ignorar las preocupaciones personales de los colaboradores",
+            "Incentivar descansos y pausas activas",
+            "Reducir las oportunidades de comunicación abierta",
+            "Exigir resultados sin considerar el bienestar"
+        ],
+        correct: 1
+    },
+    {
+        question: "¿Cómo puede un líder identificar el estrés en el equipo?",
+        options: [
+            "Analizando cambios en el comportamiento y la productividad",
+            "Evaluando únicamente los resultados alcanzados",
+            "Evitando reuniones regulares con el equipo",
+            "Fomentando la competencia interna para aumentar la presión"
+        ],
+        correct: 0
+    },
+    {
+        question: "¿Qué actitud ayuda a generar confianza y reducir el estrés en el equipo?",
+        options: [
+            "Imponer decisiones sin consultar",
+            "Incrementar las tareas sin explicación previa",
+            "Fomentar la transparencia y la participación en las decisiones",
+            "Evitar la retroalimentación constante"
+        ],
+        correct: 2
+    },
+    {
+        question: "¿Qué es una cultura organizacional inclusiva?",
+        options: [
+            "Un entorno donde las diferencias son ignoradas",
+            "Una cultura que valora y respeta la diversidad",
+            "Una organización enfocada únicamente en resultados",
+            "Un espacio con metas inalcanzables para todos"
+        ],
+        correct: 1
+    },
+    {
+        question: "¿Qué papel juega la comunicación efectiva en una cultura organizacional positiva?",
+        options: [
+            "Reduce conflictos y mejora el trabajo en equipo",
+            "Incrementa el estrés por exceso de información",
+            "Genera confusión en las tareas",
+            "Disminuye la motivación de los colaboradores"
+        ],
+        correct: 0
+    },
+    {
+        question: "¿Qué política organizacional fomenta el bienestar?",
+        options: [
+            "Aumentar las exigencias de trabajo diario",
+            "Implementar programas de salud y bienestar",
+            "Reducir las oportunidades de desarrollo personal",
+            "Limitar el acceso a actividades recreativas"
+        ],
+        correct: 1
+    },
+    {
+        question: "¿Qué impacto tiene una cultura de apoyo en el estrés laboral?",
+        options: [
+            "Incrementa los conflictos internos",
+            "Fomenta el compromiso y reduce la tensión",
+            "Disminuye la productividad general",
+            "Genera desinterés en los colaboradores"
+        ],
+        correct: 1
+    },
+    {
+        question: "¿Qué acción promueve un entorno organizacional saludable?",
+        options: [
+            "Ignorar las inquietudes de los colaboradores",
+            "Aumentar las cargas laborales sin consulta previa",
+            "Reducir las oportunidades de comunicación",
+            "Fomentar el trabajo en equipo y la colaboración"
+        ],
+        correct: 3
+    }
+];
+
+
+    
+let currentQuestion = 0;
+let score = 0;
+
+function startQuiz() {
+    const playerName = document.getElementById('playerName').value;
+    if (!playerName) {
+        alert('Por favor ingrese su nombre para comenzar');
+        return;
+    }
+    document.querySelector('.start-screen').classList.remove('active');
+    document.querySelector('.quiz-container').classList.add('active');
+    loadQuestion();
+}
+
+function updateProgress() {
+    const progress = (currentQuestion / questions.length) * 100;
+    document.querySelector('.progress').style.width = `${progress}%`;
+}
+
+function loadQuestion() {
+    if (currentQuestion >= questions.length) {
+        showCertificate();
+        return;
+    }
+
+    updateProgress();
+    const questionData = questions[currentQuestion];
+    document.querySelector('.question').textContent = questionData.question;
+    
+    const optionsContainer = document.querySelector('.options');
+    optionsContainer.innerHTML = '';
+    
+    questionData.options.forEach((option, index) => {
+        const button = document.createElement('div');
+        button.className = 'option';
+        button.textContent = option;
+        button.onclick = () => selectOption(index);
+        optionsContainer.appendChild(button);
+    });
+}
+
+function selectOption(optionIndex) {
+    const options = document.querySelectorAll('.option');
+    const correct = questions[currentQuestion].correct === optionIndex;
+    
+    // Deshabilitar todas las opciones después de la selección
+    options.forEach(option => option.style.pointerEvents = 'none');
+    
+    // Mostrar respuesta correcta/incorrecta
+    if (correct) {
+        options[optionIndex].classList.add('correct');
+        score++;
+    } else {
+        options[optionIndex].classList.add('wrong');
+        options[questions[currentQuestion].correct].classList.add('correct');
+    }
+
+    // Esperar un momento antes de cargar la siguiente pregunta
+    setTimeout(() => {
+        currentQuestion++;
+        loadQuestion();
+    }, 1500);
+}
+
+function showCertificate() {
+    document.querySelector('.quiz-container').classList.remove('active');
+    
+    const passingScore = Math.ceil(questions.length * 0.7); // 70% del total de preguntas
+    const playerName = document.getElementById('playerName').value;
+    
+    if (score >= passingScore) {
+        // Mostrar certificado si el usuario aprobó
+        document.querySelector('.certificate-container').classList.add('active');
+        document.getElementById('certificateName').textContent = playerName;
+    } else {
+        // Mostrar mensaje de no aprobado
+        alert(`Lo siento, ${playerName}. No aprobaste el test. Tu puntaje fue ${score} de ${questions.length} (${(score / questions.length * 100).toFixed(2)}%). Necesitas al menos un 70% para aprobar.`);
+    }
+}
+    </script>
+</body>
+</html>
